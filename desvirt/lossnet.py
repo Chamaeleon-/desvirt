@@ -1,6 +1,7 @@
 import subprocess
 import shlex
 import logging
+import csv
 
 from .vnet import VirtualNet
 
@@ -20,7 +21,10 @@ class LossyNet(VirtualNet):
 
     # TODO create temperature to loss logic
     def parse_temperatures(self, temperatureFile):
-        pass
+        with open(temperatureFile) as csvfile:
+            temperature_lines = csv.reader(csvfile)
+            for line in temperature_lines:
+                print ', '.join(line)
 
     def create(self):
         VirtualNet.create(self)
@@ -40,6 +44,7 @@ class LossyNet(VirtualNet):
     def add_link(self, from_tap, to_tap, bandwidth='100mbit', packet_loss=0, delay=0, temperatureFile=""):
 
         # TODO add Loss corresponding to temperature
+        self.parse_temperatures(temperatureFile)
 
         logging.getLogger("").info("%s: New link from %s to %s, rate=%s, loss=%s, delay=%s" % (self.name, from_tap, to_tap, bandwidth, packet_loss, delay))
 
