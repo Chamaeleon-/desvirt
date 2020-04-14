@@ -126,7 +126,7 @@ def nodeHandler(name, nodeType, elf_file=None, tcp_port=None):
 
     return node
 
-def linkHandler(from_node, from_if, to_node, to_if, channel, rate, loss, delay, uni_directional):
+def linkHandler(from_node, from_if, to_node, to_if, channel, rate, loss, temperatureFile, delay, uni_directional):
     global options
     global topo
     global taps
@@ -143,9 +143,9 @@ def linkHandler(from_node, from_if, to_node, to_if, channel, rate, loss, delay, 
         loss_percent = float(loss) * 100
         if not rate:
             rate = '100mbit'
-        net.add_link(from_tap.tap, to_tap.tap, bandwidth=rate, packet_loss=loss_percent, delay=float(delay))
+        net.add_link(from_tap.tap, to_tap.tap, bandwidth=rate, packet_loss=loss_percent, delay=float(delay)) # TODO add temperatureFile if not none
         if not uni_directional:
-            net.add_link(to_tap.tap, from_tap.tap, bandwidth=rate, packet_loss=loss_percent, delay=float(delay))
+            net.add_link(to_tap.tap, from_tap.tap, bandwidth=rate, packet_loss=loss_percent, delay=float(delay)) # TODO add temperatureFile if not none
 
 def usage():
     print("Usage: start_vnet <topology.xml>")
