@@ -98,7 +98,7 @@ class XMLTopology():
 
             to_node = link.getAttribute('to_node')
             to_if = link.getAttribute('to_if')
-            
+            # TODO add field for csv Loss over Time
             loss = link.getAttribute('loss')
 
             rate = link.getAttribute('rate')

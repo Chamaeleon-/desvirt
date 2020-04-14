@@ -13,8 +13,12 @@ class LossyNet(VirtualNet):
         self.mark_counter = 0
         self.chain_name = name.upper()
         self.iflist = []
-        
+
+        # TODO add list/file with temperature curve
+
         VirtualNet.__init__(self,name,create)
+
+    # TODO create temperature to loss logic
 
     def create(self):
         VirtualNet.create(self)
@@ -32,6 +36,9 @@ class LossyNet(VirtualNet):
         self.ebtables('-X %s' % self.chain_name)
 
     def add_link(self, from_tap, to_tap, bandwidth='100mbit', packet_loss=0, delay=0):
+
+        # TODO add Loss corresponding to temperature
+
         logging.getLogger("").info("%s: New link from %s to %s, rate=%s, loss=%s, delay=%s" % (self.name, from_tap, to_tap, bandwidth, packet_loss, delay))
 
         mark = self.get_mark()
