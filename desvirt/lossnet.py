@@ -41,7 +41,7 @@ class LossyNet(VirtualNet):
         self.ebtables('-D FORWARD --logical-in %s -j %s' %(self.name, self.chain_name))
         self.ebtables('-X %s' % self.chain_name)
 
-    def add_link(self, from_tap, to_tap, bandwidth='100mbit', packet_loss=0, delay=0, temperatureFile=""):
+    def add_link(self, from_tap, to_tap, bandwidth='100mbit', packet_loss=0, delay=0, temperatureFile="temp"):
 
         # TODO add Loss corresponding to temperature
         self.parse_temperatures(temperatureFile)
