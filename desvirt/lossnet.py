@@ -15,16 +15,18 @@ class LossyNet(VirtualNet):
         self.chain_name = name.upper()
         self.iflist = []
 
-        # TODO add list/file with temperature curve
+        # TODO add function for temperature curve
 
         VirtualNet.__init__(self,name,create)
 
-    # TODO create temperature to loss logic
+    # TODO create temperature to loss logic with an iterator: ask for next, get timer and loss
     def parse_temperatures(self, temperatureFile):
         with open(temperatureFile) as csvfile:
             temperature_lines = csv.reader(csvfile)
             for line in temperature_lines:
                 print ', '.join(line)
+
+    # TODO create scheduler and function which sets new loss and schedule the next timer
 
     def create(self):
         VirtualNet.create(self)
@@ -43,7 +45,7 @@ class LossyNet(VirtualNet):
 
     def add_link(self, from_tap, to_tap, bandwidth='100mbit', packet_loss=0, delay=0, temperatureFile="temp"):
 
-        # TODO add Loss corresponding to temperature
+        # TODO add Loss corresponding to temperature and call scheduler for next loss change
         self.parse_temperatures(temperatureFile)
 
         logging.getLogger("").info("%s: New link from %s to %s, rate=%s, loss=%s, delay=%s" % (self.name, from_tap, to_tap, bandwidth, packet_loss, delay))
