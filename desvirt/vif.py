@@ -13,6 +13,7 @@ from .vnet import VirtualNet
 class VirtualInterface():
     def __init__(self, macaddr=None, up=True, net=None, nicname=None,create=True,node=None,tap=None):
         self.tap = tap
+        self.temp_iter = None
 
         if create:
             if (tap == None):
