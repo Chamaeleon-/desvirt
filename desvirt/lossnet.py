@@ -48,14 +48,15 @@ class LossyNet(VirtualNet):
         # TODO add Loss corresponding to temperature and call scheduler for next loss change
         self.parse_temperatures(temperatureFile)
 
-        logging.getLogger("").info("%s: New link from %s to %s, rate=%s, loss=%s, delay=%s" % (self.name, from_tap, to_tap, bandwidth, packet_loss, delay))
+        logging.getLogger("").info("%s: New link from %s to %s, rate=%s, loss=%s, delay=%s" % (self.name, from_tap.tap, to_tap.tap, bandwidth, packet_loss, delay))
 
         mark = self.get_mark()
-        self.ebtables('-A %s -i %s -o %s -j mark --mark-set %d' % (self.chain_name, from_tap, to_tap, mark))
+        self.ebtables('-A %s -i %s -o %s -j mark --mark-set %d' % (self.chain_name, from_tap.tap, to_tap.tap, mark))
 
-        self.tc('class add dev %s parent 1:1 classid 1:%d htb rate %s ceil %s' %(to_tap, mark+10, bandwidth, bandwidth))
-        self.tc('qdisc add dev %s parent 1:%d netem loss %d%% delay %dms' % (to_tap, mark+10, packet_loss, delay))
-        self.tc('filter add dev %s parent 1: protocol all handle %d fw flowid 1:%d' % (to_tap, mark, mark+10))
+
+        self.tc('class add dev %s parent 1:1 classid 1:%d htb rate %s ceil %s' %(to_tap.tap, mark+10, bandwidth, bandwidth))
+        self.tc('qdisc add dev %s parent 1:%d netem loss %d%% delay %dms' % (to_tap.tap, mark+10, packet_loss, delay))
+        self.tc('filter add dev %s parent 1: protocol all handle %d fw flowid 1:%d' % (to_tap.tap, mark, mark+10))
 
     def get_mark(self):
         self.mark_counter += 1
