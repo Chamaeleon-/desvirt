@@ -23,8 +23,7 @@ class LossyNet(VirtualNet):
     def parse_temperatures(self, temperatureFile):
         with open(temperatureFile) as csvfile:
             temperature_lines = csv.reader(csvfile)
-            for line in temperature_lines:
-                print ', '.join(line)
+            return list(temperature_lines)
 
     # TODO create scheduler and function which sets new loss and schedule the next timer
 
