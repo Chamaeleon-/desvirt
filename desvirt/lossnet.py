@@ -44,8 +44,8 @@ class LossyNet(VirtualNet):
 
     def add_link(self, from_tap, to_tap, bandwidth='100mbit', packet_loss=0, delay=0, temperatureFile="temp"):
 
-        # TODO add Loss corresponding to temperature and call scheduler for next loss change
-        self.parse_temperatures(temperatureFile)
+        # save temperature iterator to interface
+        to_tap.temp_iter = iter(self.parse_temperatures(temperatureFile))
 
         logging.getLogger("").info("%s: New link from %s to %s, rate=%s, loss=%s, delay=%s" % (self.name, from_tap.tap, to_tap.tap, bandwidth, packet_loss, delay))
 
