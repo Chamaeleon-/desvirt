@@ -15,11 +15,14 @@ class LossyNet(VirtualNet):
         self.chain_name = name.upper()
         self.iflist = []
 
-        # TODO add function for temperature curve
 
         VirtualNet.__init__(self,name,create)
 
-    # TODO create temperature to loss logic with an iterator: ask for next, get timer and loss
+    # TODO add function for temperature curve
+    def get_loss(self, temp):
+        loss = temp
+        return loss
+
     def parse_temperatures(self, temperatureFile):
         with open(temperatureFile) as csvfile:
             temperature_lines = csv.reader(csvfile)
