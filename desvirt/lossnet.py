@@ -42,8 +42,8 @@ class LossyNet(VirtualNet):
                 continue
             bit_error_rate = get_loss(e[1])
             # set bit error with netem TODO keep track on subprocesses
-            self.tc('qdisc add dev %s parent 1:%d netem loss %d%% delay %dms corrupt %d%%' % (to_tap.tap, mark+10, packet_loss, delay, bit_error_rate))
-            sleep(timer)         # TODO set subprocess.run timeout instead
+            self.tc('qdisc add dev %s parent 1:%d netem loss %d%% delay %dms corrupt %d%%' % (to_tap.tap, mark+10, packet_loss, delay, bit_error_rate), timeout=timer)
+            # sleep(timer)         #  set subprocess.run timeout instead
 
     def create(self):
         VirtualNet.create(self)
@@ -88,10 +88,16 @@ class LossyNet(VirtualNet):
         logging.getLogger("").debug(cmd)
         status = subprocess.call(shlex.split(cmd))
 
-    def tc(self, command):
+    def tc(self, command, timeout=None):
         cmd = 'sudo tc %s' % command
         logging.getLogger("").debug(cmd)
-        status = subprocess.call(shlex.split(cmd))
+        if timeout is not None:
+            try:
+                status = subprocess.call(shlex.split(cmd), timeout=timeout)
+            except subprocess.TimeoutExpired:
+                logging.getLogger("").debug("tc: subprocess.TimeoutExpired")
+        else:
+            status = subprocess.call(shlex.split(cmd))
 
     def addif(self, ifname, setup=True):
         logging.getLogger("").debug("Net %s adding if %s." %(self.name, ifname))
