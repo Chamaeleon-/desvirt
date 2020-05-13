@@ -8,7 +8,10 @@ from time import sleep
 from .vnet import VirtualNet
 
 
-# TODO add function for temperature curve
+# TODO add function for temperature curve, percentage of packets with bit error needed
+# netem corrupt
+#        allows the emulation of random noise introducing an error in a random
+#        position for a chosen percent of packets.
 def get_loss(temp):
     loss = temp
     return loss
@@ -43,7 +46,7 @@ class LossyNet(VirtualNet):
             bit_error_rate = get_loss(e[1])
             # set bit error with netem TODO keep track on subprocesses
             self.tc('qdisc add dev %s parent 1:%d netem loss %d%% delay %dms corrupt %d%%' % (to_tap.tap, mark+10, packet_loss, delay, bit_error_rate), timeout=timer)
-            # sleep(timer)         #  set subprocess.run timeout instead
+            # sleep(timer)         # set subprocess.run timeout instead
 
     def create(self):
         VirtualNet.create(self)
@@ -83,16 +86,19 @@ class LossyNet(VirtualNet):
         self.mark_counter += 1
         return self.mark_counter
 
-    def ebtables(self, command):
+    @staticmethod
+    def ebtables(command):
         cmd = 'sudo ebtables %s' % command
         logging.getLogger("").debug(cmd)
         status = subprocess.call(shlex.split(cmd))
 
-    def tc(self, command, timeout=None):
+    @staticmethod
+    def tc(command, timeout=None):
         cmd = 'sudo tc %s' % command
         logging.getLogger("").debug(cmd)
         if timeout is not None:
             try:
+                # docs says: If the timeout expires, the child process will be killed and waited for.
                 status = subprocess.call(shlex.split(cmd), timeout=timeout)
             except subprocess.TimeoutExpired:
                 logging.getLogger("").debug("tc: subprocess.TimeoutExpired")
