@@ -43,9 +43,11 @@ class LossyNet(VirtualNet):
             timer = e[0]
             if timer == "LOOP":
                 continue
-            bit_error_rate = get_loss(e[1])
+            else:
+                timer = int(e[0])
+            bit_error_rate = int(get_loss(e[1]))
             # set bit error with netem TODO keep track on subprocesses
-            self.tc('qdisc add dev %s parent 1:%d netem loss %d%% delay %dms corrupt %d%%' % (to_tap.tap, mark+10, packet_loss, delay, bit_error_rate), timeout=timer)
+            self.tc('qdisc replace dev %s parent 1:%d netem loss %d%% delay %dms corrupt %d%%' % (to_tap.tap, mark+10, packet_loss, delay, bit_error_rate), timeout=timer)
             # sleep(timer)         # set subprocess.run timeout instead
 
     def create(self):
