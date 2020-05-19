@@ -1,26 +1,9 @@
 import subprocess
 import shlex
 import logging
-import csv
 import threading
-from time import sleep
 
 from .vnet import VirtualNet
-
-
-# TODO add function for temperature curve, percentage of packets with bit error needed
-# netem corrupt
-#        allows the emulation of random noise introducing an error in a random
-#        position for a chosen percent of packets.
-def get_loss(temp):
-    loss = temp
-    return loss
-
-
-def parse_temperatures(temperatureFile):
-    with open(temperatureFile) as csvfile:
-        temperature_lines = csv.reader(csvfile)
-        return list(temperature_lines)
 
 
 """                                                             
