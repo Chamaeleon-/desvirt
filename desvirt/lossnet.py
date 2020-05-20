@@ -4,7 +4,7 @@ import logging
 import threading
 
 from .vnet import VirtualNet
-
+from .mbox import MiddleBox
 
 """                                                             
 defines a virtual net with lossy links                          
@@ -21,17 +21,17 @@ class LossyNet(VirtualNet):
         VirtualNet.__init__(self,name,create)
 
     # sets new bit error and schedules the next timer
-    def set_and_schedule_loss(self, to_tap, mark, packet_loss, delay):
-        for e in to_tap.temp_iter:
-            timer = e[0]
-            if timer == "LOOP":
-                continue
-            else:
-                timer = int(e[0])
-            bit_error_rate = int(get_loss(e[1]))
-            # set bit error with netem TODO keep track on subprocesses
-            self.tc('qdisc replace dev %s parent 1:%d netem loss %d%% delay %dms corrupt %d%%' % (to_tap.tap, mark+10, packet_loss, delay, bit_error_rate), timeout=timer)
-            # sleep(timer)         # set subprocess.run timeout instead
+    # def set_and_schedule_loss(self, to_tap, mark, packet_loss, delay):
+    #     for e in to_tap.temp_iter:
+    #         timer = e[0]
+    #         if timer == "LOOP":
+    #             continue
+    #         else:
+    #             timer = int(e[0])
+    #         bit_error_rate = int(get_loss(e[1]))
+    #         # set bit error with netem TODO keep track on subprocesses
+    #         self.tc('qdisc replace dev %s parent 1:%d netem loss %d%% delay %dms corrupt %d%%' % (to_tap.tap, mark+10, packet_loss, delay, bit_error_rate), timeout=timer)
+    #         # sleep(timer)         # set subprocess.run timeout instead
 
     def create(self):
         VirtualNet.create(self)
@@ -50,8 +50,8 @@ class LossyNet(VirtualNet):
 
     def add_link(self, from_tap, to_tap, bandwidth='100mbit', packet_loss=0, delay=0, temperatureFile="temp"):
 
-        # save temperature iterator to interface
-        to_tap.temp_iter = iter(parse_temperatures(temperatureFile))
+        # box = MiddleBox()
+        # TODO create links between from and to and box taps
 
         logging.getLogger("").info("%s: New link from %s to %s, rate=%s, loss=%s, delay=%s" % (self.name, from_tap.tap, to_tap.tap, bandwidth, packet_loss, delay))
 
@@ -60,9 +60,7 @@ class LossyNet(VirtualNet):
 
         self.tc('class add dev %s parent 1:1 classid 1:%d htb rate %s ceil %s' %(to_tap.tap, mark+10, bandwidth, bandwidth))
         if temperatureFile is not None:
-            # add Loss corresponding to temperature and call scheduler for next loss change
-            temperature_regulation_thread = threading.Thread(target=self.set_and_schedule_loss, args=(to_tap, mark, packet_loss, delay))
-            temperature_regulation_thread.start()
+            pass
         else:
             self.tc('qdisc add dev %s parent 1:%d netem loss %d%% delay %dms' % (to_tap.tap, mark+10, packet_loss, delay))
         self.tc('filter add dev %s parent 1: protocol all handle %d fw flowid 1:%d' % (to_tap.tap, mark, mark+10))
