@@ -12,27 +12,27 @@ def parse_temperatures(temperature_file):
 
 
 class MiddleBox:
+    thread = None
+    temp_offset_lut = None
     in_if = None
     out_if = None
-    distance = None  # in meters
-    noise_floor = None
-    sensitivity_offset = None
-    tx_power = None
-    frequency = 2440  # in megahertz
-    fspl = 20 * math.log10(distance) + 20 * math.log10(frequency) - 27.55
-    temperature_file = None
-    temp_offset_lut = None
 
     def __init__(self, from_if: VirtualInterface, to_if: VirtualInterface, distance: float, noise_floor: float, sensitivity_offset: float, tx_power: float, frequency: float = 2440,
                  temperature_file: str = None):
         self.thread = threading.Thread(target=self.box())
-        self.in_if = vif.VirtualInterface.create()
-        self.out_if = vif.VirtualInterface.create()
+        self.from_if = from_if
+        self.to_if = to_if
+        self.name = f'mb-{self.from_if.nicname}-{self.to_if.nicname}'
+        self.in_if = VirtualInterface(macaddr=None, up=True, net=None, nicname=f'{self.name}-in', create=True,
+                                          node=None, tap=f'{self.from_if.nicname}-{self.to_if.nicname}i')
+        self.out_if = VirtualInterface(macaddr=None, up=True, net=None, nicname=f'{self.name}-out', create=True,
+                                           node=None, tap=f'{self.from_if.nicname}-{self.to_if.nicname}o')
         self.distance = distance
         self.noise_floor = noise_floor
         self.sensitivity_offset = sensitivity_offset
         self.tx_power = tx_power
-        self.frequency = frequency
+        self.frequency = frequency  # in megahertz
+        self.fspl = 20 * math.log10(distance) + 20 * math.log10(frequency) - 27.55
         self.temperature_file = temperature_file
 
     def start(self):
@@ -41,9 +41,11 @@ class MiddleBox:
         self.thread.start()
 
     def delete(self):
-        self.thread.join()
-        self.out_if.delete()
-        self.in_if.delete()
+        # if self.thread is not None:
+        #     self.thread.join()
+        if self.in_if and self.out_if is not None:
+            self.out_if.delete()
+            self.in_if.delete()
 
     def __del__(self):
         self.delete()
