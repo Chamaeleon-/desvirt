@@ -3,6 +3,7 @@ import math
 import threading
 from typing import Optional
 from desvirt.vif import VirtualInterface
+from desvirt.vnet import VirtualNet
 
 
 def parse_temperatures(temperature_file):
@@ -16,18 +17,21 @@ class MiddleBox:
     temp_offset_lut = None
     in_if = None
     out_if = None
+    number = 0
 
-    def __init__(self, from_if: VirtualInterface, to_if: VirtualInterface, distance: float, noise_floor: float, sensitivity_offset: float, tx_power: float, frequency: float = 2440,
+    def __init__(self, from_if: VirtualInterface, to_if: VirtualInterface, net: VirtualNet, distance: float,
+                 noise_floor: float, sensitivity_offset: float, tx_power: float, frequency: float = 2440,
                  temperature_file: str = None):
         self.thread = threading.Thread(target=self.box())
         self.from_if = from_if
         self.to_if = to_if
         self.name = f'mb-{self.from_if.nicname}-{self.to_if.nicname}'
-        self.in_if = VirtualInterface(macaddr=None, up=True, net=None, nicname=f'{self.name}-in', create=True,
-                                          node=None, tap=f'{self.from_if.nicname}-{self.to_if.nicname}i')
-        self.out_if = VirtualInterface(macaddr=None, up=True, net=None, nicname=f'{self.name}-out', create=True,
-                                           node=None, tap=f'{self.from_if.nicname}-{self.to_if.nicname}o')
-        self.distance = distance
+        self.in_if = VirtualInterface(macaddr=None, up=True, net=net, nicname=f'{self.name}-in', create=True,
+                                          node=None, tap=f'{MiddleBox.number}i')
+        self.out_if = VirtualInterface(macaddr=None, up=True, net=net, nicname=f'{self.name}-out', create=True,
+                                           node=None, tap=f'{MiddleBox.number}o')
+        MiddleBox.number = MiddleBox.number + 1
+        self.distance = distance  # in meters
         self.noise_floor = noise_floor
         self.sensitivity_offset = sensitivity_offset
         self.tx_power = tx_power
