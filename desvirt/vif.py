@@ -10,18 +10,20 @@ import sys
 
 from .vnet import VirtualNet
 
-class VirtualInterface():
-    def __init__(self, macaddr=None, up=True, net=None, nicname=None,create=True,node=None,tap=None):
+
+class VirtualInterface:
+    def __init__(self, macaddr: str = None, up: bool = True, net: VirtualNet = None, nicname: str = None,
+                 create: bool = True, node = None, tap: str = None):
         self.tap = tap
-        self.temp_iter = None
 
         if create:
-            if (tap == None):
-                if (node.name == None):
-                    logging.getLogger("").logger.error("Cannot create tap for non-existent VM")
+            if tap is None:
+                if node.name is None:
+                    logging.getLogger("").error("Cannot create tap for non-existent VM")
                     sys.exit(1)
-                if (net == None):
-                    logging.getLogger("").logger.warn("Something strange is going on, net is undefined while creating tap for %s" % node.name)
+                if net is None:
+                    logging.getLogger("").warning(
+                        "Something strange is going on, net is undefined while creating tap for %s" % node.name)
                     tap = "desvirt_%s" % node.name
                 else:
                     tap = "%s_%s" % (net.name, node.name)
@@ -41,25 +43,25 @@ class VirtualInterface():
 
         if net:
             self.net = net
-            net.addif(self.tap,setup=create)
+            net.addif(self.tap, setup=create)
 
     def create(self):
         mktap(self.tap)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.tap
-    
-    def __repr__(self):
+
+    def __repr__(self) -> str:
         return self.tap
 
     def delete(self):
-        if self.state=='up':
+        if self.state == 'up':
             try:
                 self.down()
             except Exception as e:
-                logging.getLogger("").logger.warn(e)
+                logging.getLogger("").warning(e)
 
-        for i in range(0,20):
+        for i in range(0, 20):
             if rmtap(self.tap):
                 break
             logging.getLogger("").debug("tap %s busy, retrying..." % self.tap)
@@ -67,19 +69,17 @@ class VirtualInterface():
 
     def up(self):
         self.ifconfig('up')
-        self.state='up'
+        self.state = 'up'
 
     def down(self):
         self.ifconfig('down')
-        self.state='down'
+        self.state = 'down'
 
-    def ifconfig(self, cmd):
+    def ifconfig(self, cmd: str):
         subprocess.call(shlex.split("sudo ip link set %s %s" % (self.tap, cmd)))
 
-#if __name__='__main__':
-#    print('vif test:')
 
-def mktap(tap=None):
+def mktap(tap: str = None) -> str:
     logging.getLogger("").info("creating %s for %s" % (tap, getpass.getuser()))
 
     args = ['sudo', 'ip', 'tuntap', 'add', 'mode', 'tap', 'user', getpass.getuser()]
@@ -89,18 +89,19 @@ def mktap(tap=None):
     subprocess.call(args, stdout=subprocess.PIPE)
 
     return tap
-    
-def rmtap(name):
+
+
+def rmtap(name: str) -> bool:
     null = open('/dev/null', 'wb')
     retcode = subprocess.call(['sudo', 'ip', 'tuntap', 'del', name, 'mode', 'tap'], stdout=null)
     null.close()
     return retcode == 0
 
+
 def genmac():
-    mac = [ 0x50, 0x51, 0x52,
-    random.randint(0x00, 0x7f),
-    random.randint(0x00, 0xff),
-    random.randint(0x00, 0xff) ]
+    mac = [0x50, 0x51, 0x52,
+           random.randint(0x00, 0x7f),
+           random.randint(0x00, 0xff),
+           random.randint(0x00, 0xff)]
 
-    return (':'.join(["%02x" % x for x in mac]))
-
+    return ':'.join(["%02x" % x for x in mac])
