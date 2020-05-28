@@ -28,7 +28,6 @@ in_testbed = False
 
 topo = None
 macs = None
-taps = None
 pids = None
 
 # if nodes of type 'meshrouter' are defined, we need libvirt
@@ -60,7 +59,6 @@ def netHandler(name, desc):
 def nicHandler(name, net=None, node=None, mac=None):
     global topo
     global options
-    global taps
     global macs
     logger.debug("nicHandler: %s:%s, net: %s" % (node.name, name, net.name))
    
@@ -75,9 +73,9 @@ def nicHandler(name, net=None, node=None, mac=None):
     
     tap = None
     logger.debug("looking for nics for node %s" % node.name)
-    if node.name in taps:
-        if name in taps[node.name]:
-            tap = taps[node.name][name]
+    if node.name in vif.VirtualInterface.taps:
+        if name in vif.VirtualInterface.taps[node.name]:
+            tap = vif.VirtualInterface.taps[node.name][name]
             logger.debug("found a nic")
 
     nic = vif.VirtualInterface(macaddr=mac,nicname=name,node=node,net=net,create=options.start, tap=tap)
@@ -87,27 +85,26 @@ def nicHandler(name, net=None, node=None, mac=None):
 
     if options.start:
         logger.debug("add nic for node %s as %s" % (node.name, nic.nicname))
-        taps[node.name][nic.nicname] = nic
+        vif.VirtualInterface.taps[node.name][nic.nicname] = nic
     else:
         logger.debug("check if %s is in taps" % node.name)
-        if node.name in taps:
-            if nic.nicname in taps[node.name]:
-                nic.tap = taps[node.name][nic.nicname].tap
+        if node.name in vif.VirtualInterface.taps:
+            if nic.nicname in vif.VirtualInterface.taps[node.name]:
+                nic.tap = vif.VirtualInterface.taps[node.name][nic.nicname].tap
 
     return nic
 
 def nodeHandler(name, nodeType, elf_file=None, tcp_port=None):
     global topo
-    global taps
     global management_net
     global logger
     global need_libvirt
     global pids
 
     logger.debug("nodeHandler: %s of type %s" % (name, nodeType))
-    logger.debug("looking in %s" % str(taps))
-    if not name in taps:
-        taps[name] = {}
+    logger.debug("looking in %s" % str(vif.VirtualInterface.taps))
+    if not name in vif.VirtualInterface.taps:
+        vif.VirtualInterface.taps[name] = {}
     
     if not name in macs:
         macs[name] = {}
@@ -120,7 +117,7 @@ def nodeHandler(name, nodeType, elf_file=None, tcp_port=None):
         logger.debug("add meshrouter with managment interface")
         eth0 = nicHandler('eth0', net=management_net, node=node)
         node.nics.append(eth0)
-        taps[name]['eth0'] = eth0
+        vif.VirtualInterface.taps[name]['eth0'] = eth0
 
     topo.nodes[name] = node
 
@@ -129,14 +126,13 @@ def nodeHandler(name, nodeType, elf_file=None, tcp_port=None):
 def linkHandler(from_node, from_if, to_node, to_if, channel, rate, loss, temperatureFile, delay, uni_directional):
     global options
     global topo
-    global taps
     logger.debug("linkHandler: from: %s:%s to: %s:%s loss: %s delay: %s uni_directional: %s" % (from_node, from_if, to_node, to_if, loss, delay, uni_directional))
 
     if not options.start:
         return
 
-    from_tap = taps[from_node][from_if]
-    to_tap = taps[to_node][to_if]
+    from_tap = vif.VirtualInterface.taps[from_node][from_if]
+    to_tap = vif.VirtualInterface.taps[to_node][to_if]
 
     if to_tap.net.name == from_tap.net.name:
         net = to_tap.net
@@ -252,11 +248,10 @@ def main():
     if not macs:
         macs = {}
 
-    global taps
     if options.stop or options.undefine:
-        taps = load_statefile("%s/%s.taps" % (lib_dir,base))
-    if not taps:
-        taps = {}
+        vif.VirtualInterface.taps = load_statefile("%s/%s.taps" % (lib_dir, base))
+    if not vif.VirtualInterface.taps:
+        vif.VirtualInterface.taps = {}
 
     global pids
     if options.stop or options.undefine:
@@ -352,7 +347,7 @@ def main():
         save_statefile("%s/%s.macs" % (lib_dir,base), macs)
 
     if options.start:
-        save_statefile("%s/%s.taps" % (lib_dir,base), taps)
+        save_statefile("%s/%s.taps" % (lib_dir,base), vif.VirtualInterface.taps)
         save_statefile("%s/%s.pids" % (lib_dir,base), pids)
         input("Press Enter to exit...")
 

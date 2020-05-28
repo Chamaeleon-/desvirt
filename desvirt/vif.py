@@ -12,6 +12,8 @@ from .vnet import VirtualNet
 
 
 class VirtualInterface:
+    taps = None
+
     def __init__(self, macaddr: str = None, up: bool = True, net: VirtualNet = None, nicname: str = None,
                  create: bool = True, node = None, tap: str = None):
         self.tap = tap
