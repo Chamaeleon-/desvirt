@@ -13,6 +13,7 @@ def parse_temperatures(temperature_file):
 
 
 class MiddleBox:
+    list_of_boxes = []
     thread = None
     temp_offset_lut = None
     in_if = None
@@ -26,10 +27,11 @@ class MiddleBox:
         self.from_if = from_if
         self.to_if = to_if
         self.name = f'mb-{self.from_if.nicname}-{self.to_if.nicname}'
+        self.number = MiddleBox.number
         self.in_if = VirtualInterface(macaddr=None, up=True, net=net, nicname=f'{self.name}-in', create=True,
-                                          node=None, tap=f'{MiddleBox.number}i')
+                                          node=None, tap=f'mb{self.number}i')
         self.out_if = VirtualInterface(macaddr=None, up=True, net=net, nicname=f'{self.name}-out', create=True,
-                                           node=None, tap=f'{MiddleBox.number}o')
+                                           node=None, tap=f'mb{self.number}o')
         MiddleBox.number = MiddleBox.number + 1
         self.distance = distance  # in meters
         self.noise_floor = noise_floor
