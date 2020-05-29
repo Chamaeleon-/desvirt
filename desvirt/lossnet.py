@@ -53,11 +53,11 @@ class LossyNet(VirtualNet):
         noise_floor = -30
         sensitivity_offset = 5
         tx_power = 3
-        box = MiddleBox(from_tap, to_tap, distance, noise_floor, sensitivity_offset, tx_power)
+        box = MiddleBox(from_tap, to_tap, self, distance, noise_floor, sensitivity_offset, tx_power)
         # create links between from and to and box taps
         middlebox_in_tap = box.in_if.tap
         middlebox_out_tap = box.out_if.tap
-
+        box.start()
         logging.getLogger("").info("%s: New link from %s to %s, rate=%s, loss=%s, delay=%s" % (self.name, from_tap.tap, to_tap.tap, bandwidth, packet_loss, delay))
 
         mark_in = self.get_mark()

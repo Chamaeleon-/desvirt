@@ -8,5 +8,5 @@ setup(name='des-virt',
       author='Kaspar Schleiser',
       author_email='kaspar.schleiser@fu-berlin.de',
       url='http://des-testbed.net',
-      data_files=[('/etc/desvirt/', [])],      
+      data_files=[('/etc/desvirt/', [])], requires=['scapy']
       )
