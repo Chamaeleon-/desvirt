@@ -53,7 +53,7 @@ class LossyNet(VirtualNet):
         noise_floor = -30
         sensitivity_offset = 5
         tx_power = 3
-        box = MiddleBox(from_tap, to_tap, self, distance, noise_floor, sensitivity_offset, tx_power)
+        box = MiddleBox(from_tap, to_tap, distance, noise_floor, sensitivity_offset, tx_power, temperature_file=temperatureFile)
         # create links between from and to and box taps
         middlebox_in_tap = box.in_if.tap
         middlebox_out_tap = box.out_if.tap
@@ -63,16 +63,16 @@ class LossyNet(VirtualNet):
         mark_in = self.get_mark()
         self.ebtables('-A %s -i %s -o %s -j mark --mark-set %d' % (self.chain_name, from_tap.tap, middlebox_in_tap, mark_in))
 
-        self.tc('class add dev %s parent 1:1 classid 1:%d htb rate %s ceil %s' %(middlebox_in_tap, mark_in+10, bandwidth, bandwidth))
-        self.tc('qdisc add dev %s parent 1:%d netem loss %d%% delay %dms' % (middlebox_in_tap, mark_in+10, packet_loss, delay))
-        self.tc('filter add dev %s parent 1: protocol all handle %d fw flowid 1:%d' % (middlebox_in_tap, mark_in, mark_in+10))
+        # self.tc('class add dev %s parent 1:1 classid 1:%d htb rate %s ceil %s' %(middlebox_in_tap, mark_in+10, bandwidth, bandwidth))
+        # self.tc('qdisc add dev %s parent 1:%d netem loss %d%% delay %dms' % (middlebox_in_tap, mark_in+10, packet_loss, delay))
+        # self.tc('filter add dev %s parent 1: protocol all handle %d fw flowid 1:%d' % (middlebox_in_tap, mark_in, mark_in+10))
 
         mark_out = self.get_mark()
         self.ebtables('-A %s -i %s -o %s -j mark --mark-set %d' % (self.chain_name, middlebox_out_tap, to_tap.tap, mark_out))
 
-        self.tc('class add dev %s parent 1:1 classid 1:%d htb rate %s ceil %s' %(to_tap.tap, mark_out+10, bandwidth, bandwidth))
-        self.tc('qdisc add dev %s parent 1:%d netem loss %d%% delay %dms' % (to_tap.tap, mark_out+10, packet_loss, delay))
-        self.tc('filter add dev %s parent 1: protocol all handle %d fw flowid 1:%d' % (to_tap.tap, mark_out, mark_out+10))
+        # self.tc('class add dev %s parent 1:1 classid 1:%d htb rate %s ceil %s' %(to_tap.tap, mark_in+10, bandwidth, bandwidth))
+        # self.tc('qdisc add dev %s parent 1:%d netem loss %d%% delay %dms' % (to_tap.tap, mark_in+10, packet_loss, delay))
+        # self.tc('filter add dev %s parent 1: protocol all handle %d fw flowid 1:%d' % (to_tap.tap, mark_in, mark_in+10))
 
     def get_mark(self):
         self.mark_counter += 1
