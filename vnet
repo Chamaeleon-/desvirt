@@ -260,18 +260,18 @@ def main():
         pids = {}
 
     # parse XML file
-    try:
-        xmltopo = XMLTopology(xmlfile)
-        xmltopo.logger = logger
-        xmltopo.nodeHandler = nodeHandler
-        xmltopo.nicHandler = nicHandler
-        xmltopo.netHandler = netHandler
-        xmltopo.linkHandler = linkHandler
+    # try:
+    xmltopo = XMLTopology(xmlfile)
+    xmltopo.logger = logger
+    xmltopo.nodeHandler = nodeHandler
+    xmltopo.nicHandler = nicHandler
+    xmltopo.netHandler = netHandler
+    xmltopo.linkHandler = linkHandler
 
-        xmltopo.parse()
-    except:
-        logger.error("Couldn't find topology %s, please run ./topology_creator first!", options.topology_name)
-        sys.exit(1)
+    xmltopo.parse()
+    # except:
+    #     logger.error("Couldn't find topology %s, please run ./topology_creator first!", options.topology_name)
+    #     sys.exit(1)
 
     logger.info("Network Name: %s" % topo.name)
 
@@ -303,16 +303,16 @@ def main():
                 logger.debug("Started VM with PID: %d" % node.vm_instance.pid)
                 pids[node.name] = node.vm_instance.pid
 
-    
+
     if options.stop:
         create_lockfile(lockfile, content="stopped")
-        
-        logger.info("Shutting down bridge and links...") 
+
+        logger.info("Shutting down bridge and links...")
         for (name, net) in list(topo.nets.items()):
             net.delete()
         if need_libvirt:
             conn = libvirt.open('qemu:///system')
-        
+
         logger.info("Shutting down nodes...")
         for (name, node) in list(topo.nodes.items()):
             node.lookup(conn)
@@ -323,14 +323,14 @@ def main():
                 logger.warn("%s with %s  has no PID" % (name, elf_file))
             node.stop()
             node.undefine(conn)
-    
+
         # delay tap deletion by one second, otherwise they are still busy
         time.sleep(1)
         for (name, node) in list(topo.nodes.items()):
             logger.debug("deleting nics from node %s" % (node.name))
             for nic in node.nics:
                 nic.delete()
-        
+
         os.remove("%s/%s.taps" % (lib_dir,base))
         os.remove("%s/%s.pids" % (lib_dir,base))
 

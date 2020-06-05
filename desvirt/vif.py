@@ -8,6 +8,8 @@ import getpass
 import logging
 import sys
 
+from scapy.arch import get_if_hwaddr
+
 from .vnet import VirtualNet
 
 
@@ -31,12 +33,13 @@ class VirtualInterface:
                     tap = "%s_%s" % (net.name, node.name)
 
             self.tap = mktap(tap)
+            macaddr = get_if_hwaddr(self.tap)
 
         self.state = 'down'
         self.nicname = nicname
 
-        if not macaddr:
-            macaddr = genmac()
+        # if not macaddr:
+         # macaddr = genmac()
 
         self.macaddr = macaddr
 

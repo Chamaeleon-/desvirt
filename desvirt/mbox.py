@@ -25,7 +25,7 @@ class MiddleBox:
     out_if = None
     number = 0
 
-    def __init__(self, from_if: VirtualInterface, to_if: VirtualInterface, distance: float,
+    def __init__(self, from_if: VirtualInterface, to_if: VirtualInterface, net, distance: float,
                  noise_floor: float, sensitivity_offset: float, tx_power: float, frequency: float = 2440,
                  temperature_file: str = None):
         self.from_if = from_if
@@ -40,12 +40,12 @@ class MiddleBox:
         self.frequency = frequency  # in megahertz
         self.fspl = 20 * math.log10(distance) + 20 * math.log10(frequency) - 27.55
         self.temperature_file = temperature_file
-        self.in_if = VirtualInterface(macaddr=None, up=True, net=None, nicname=f'{self.name}-in', create=True,
-                                          node=None, tap=f'mb{self.number}i')
-        self.out_if = VirtualInterface(macaddr=None, up=True, net=None, nicname=f'{self.name}-out', create=True,
-                                           node=None, tap=f'mb{self.number}o')
-        self.ingoing = scapy.supersocket.TunTapInterface(iface=self.in_if.tap)
-        self.outgoing = scapy.supersocket.TunTapInterface(iface=self.out_if.tap)
+        # self.in_if = VirtualInterface(macaddr=None, up=True, net=net, nicname=f'{self.name}-in', create=True,
+        #                                   node=None, tap=f'mb{self.number}i')
+        # self.out_if = VirtualInterface(macaddr=None, up=True, net=net, nicname=f'{self.name}-out', create=True,
+        #                                    node=None, tap=f'mb{self.number}o')
+        # self.ingoing = scapy.supersocket.TunTapInterface(iface=self.in_if.tap)
+        # self.outgoing = scapy.supersocket.TunTapInterface(iface=self.out_if.tap)
         MiddleBox.list_of_boxes.append(self)
         self.stopbox = threading.Event()
 
@@ -62,8 +62,8 @@ class MiddleBox:
         if self.in_if and self.out_if is not None:
             self.stopbox.set()
             self.thread.join(2.0)
-            self.ingoing.close()
-            self.outgoing.close()
+            # self.ingoing.close()
+            # self.outgoing.close()
             sleep(1.5)
             self.out_if.delete()
             self.in_if.delete()
@@ -72,12 +72,17 @@ class MiddleBox:
         return self.stopbox.isSet()
 
     def box(self):
-        sendrecv.bridge_and_sniff(self.ingoing, self.outgoing, xfrm12=self.alter_pkt, xfrm21=self.alter_pkt, stop_filter=self.stop_sniff)
+        bpf_filter = f"ether src host {self.from_if.macaddr} and ether dst host {self.to_if.macaddr}"
+        print(f"BPF in mb{self.number}: {bpf_filter}")
+        sendrecv.bridge_and_sniff(self.from_if.tap, self.to_if.tap, filter=bpf_filter, xfrm12=self.alter_pkt, xfrm21=self.block_pkt, stop_filter=self.stop_sniff)
 
     def alter_pkt(self, p: packet.Packet) -> Union[packet.Packet, bool]:
         """Return True to forward, False to drop and Packet so send an alternative packet"""
         # print(hexdump(p))  #TODO too many packets -> needs filtering?
         return True
+
+    def block_pkt(self, p: packet.Packet) -> bool:
+        return False
 
     def calculate_rx_power(self) -> Optional[float]:
         # TODO add temp offset
