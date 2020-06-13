@@ -56,14 +56,10 @@ class LossyNet(VirtualNet):
         # self.ebtables(f'-t nat -F POSTROUTING')
         # self.ebtables(f'-t nat -F PREROUTING')
 
-
-    def add_link(self, from_tap: VirtualInterface, to_tap: VirtualInterface, bandwidth='250kbit', packet_loss=0, delay=0, temperatureFile="temp"):
-        distance = 10
-        noise_floor = -30
-        sensitivity_offset = 5
-        tx_power = 3
-        box = MiddleBox(from_tap, to_tap, self, distance, noise_floor, sensitivity_offset, tx_power,
-                        temperature_file=temperatureFile, packetloss=packet_loss, delay=delay)
+    def add_link(self, from_tap: VirtualInterface, to_tap: VirtualInterface, bandwidth='250kbit', packet_loss=0,
+                 delay=0, distance=10, noise_floor=-30, sensitivity_offset=5, tx_power=3, temperature_file="temp"):
+        box = MiddleBox(from_tap, to_tap, self, int(distance), noise_floor, sensitivity_offset, tx_power,
+                        temperature_file=temperature_file, packetloss=packet_loss, delay=delay)
         # create links between from and to and box taps
         # middlebox_in_tap = box.in_if.tap
         # middlebox_out_tap = box.out_if.tap

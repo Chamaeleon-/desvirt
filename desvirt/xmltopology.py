@@ -98,8 +98,21 @@ class XMLTopology():
 
             to_node = link.getAttribute('to_node')
             to_if = link.getAttribute('to_if')
-            # TODO add field for csv Loss over Time
+            # new link parameters
+            distance = link.getAttribute('distance')
+            if not distance:
+                distance = 10
+            noise_floor = link.getAttribute('noise_floor')
+            if not noise_floor:
+                noise_floor = -30
+            sensitivity_offset = link.getAttribute('sensitivity_offset')
+            if not sensitivity_offset:
+                sensitivity_offset = 5
+            tx_power = link.getAttribute('tx_power')
+            if not tx_power:
+                tx_power = 3
             temperatureFile = link.getAttribute('temperatureFile')
+
             loss = link.getAttribute('loss')
 
             rate = link.getAttribute('rate')
@@ -119,7 +132,8 @@ class XMLTopology():
                 if uni_directional_str=="true":
                     uni_directional = True
 
-            self.linkHandler(from_node, from_if, to_node, to_if, None, rate, loss, temperatureFile, delay, uni_directional)
+            self.linkHandler(from_node, from_if, to_node, to_if, None, rate, loss, temperatureFile, delay,
+                             uni_directional, distance, noise_floor, sensitivity_offset, tx_power)
 
 #            print("link from_node: %s, to_node: %s type: %s" %(from_node, to_node, linkType))
 #            print(rates)
