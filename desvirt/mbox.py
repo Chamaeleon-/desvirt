@@ -2,6 +2,7 @@ import csv
 import math
 import subprocess
 import threading
+import random
 from time import sleep
 from typing import Optional, Union
 from desvirt.vif import VirtualInterface
@@ -27,12 +28,14 @@ class MiddleBox:
 
     def __init__(self, from_if: VirtualInterface, to_if: VirtualInterface, net, distance: float,
                  noise_floor: float, sensitivity_offset: float, tx_power: float, frequency: float = 2440,
-                 temperature_file: str = None):
+                 delay: float = 0, packetloss: float = 0, temperature_file: str = None):
         self.from_if = from_if
         self.to_if = to_if
         self.name = f'mb-{self.from_if.nicname}-{self.to_if.nicname}'
         self.number = MiddleBox.number
         MiddleBox.number = MiddleBox.number + 1
+        self.delay = delay  # in seconds
+        self.packet_loss = packetloss  # in percentage
         self.distance = distance  # in meters
         self.noise_floor = noise_floor  # in dB
         self.sensitivity_offset = sensitivity_offset  # in dB
@@ -74,11 +77,16 @@ class MiddleBox:
     def box(self):
         bpf_filter = f"ether src host {self.from_if.macaddr} and ether dst host {self.to_if.macaddr}"
         print(f"BPF in mb{self.number}: {bpf_filter}")
-        sendrecv.bridge_and_sniff(self.from_if.tap, self.to_if.tap, filter=bpf_filter, xfrm12=self.alter_pkt, xfrm21=self.block_pkt, stop_filter=self.stop_sniff)
+        sendrecv.bridge_and_sniff(self.from_if.tap, self.to_if.tap, filter=bpf_filter, xfrm12=self.alter_pkt,
+                                  xfrm21=self.block_pkt, stop_filter=self.stop_sniff)
 
     def alter_pkt(self, p: packet.Packet) -> Union[packet.Packet, bool]:
         """Return True to forward, False to drop and Packet so send an alternative packet"""
         # print(hexdump(p))  #TODO too many packets -> needs filtering?
+        if self.packet_loss > 0 and random.randint(0, 100) < self.packet_loss:  # apply packet loss
+            return False
+        if self.delay > 0:  # apply packet delay
+            sleep(self.delay)
         return True
 
     def block_pkt(self, p: packet.Packet) -> bool:
