@@ -8,8 +8,6 @@ import getpass
 import logging
 import sys
 
-from scapy.arch import get_if_hwaddr
-
 from .vnet import VirtualNet
 
 
@@ -19,7 +17,8 @@ class VirtualInterface:
     def __init__(self, macaddr: str = None, up: bool = True, net: VirtualNet = None, nicname: str = None,
                  create: bool = True, node = None, tap: str = None):
         self.tap = tap
-
+        if not macaddr:
+            macaddr = genmac()
         if create:
             if tap is None:
                 if node.name is None:
@@ -32,14 +31,12 @@ class VirtualInterface:
                 else:
                     tap = "%s_%s" % (net.name, node.name)
 
-            self.tap = mktap(tap)
-            macaddr = get_if_hwaddr(self.tap)
+            self.tap = mktap(tap, macaddr)
 
         self.state = 'down'
         self.nicname = nicname
 
-        # if not macaddr:
-         # macaddr = genmac()
+
 
         self.macaddr = macaddr
 
@@ -51,7 +48,7 @@ class VirtualInterface:
             net.addif(self.tap, setup=create)
 
     def create(self):
-        mktap(self.tap)
+        mktap(self.tap, self.macaddr)
 
     def __str__(self) -> str:
         return self.tap
@@ -84,7 +81,7 @@ class VirtualInterface:
         subprocess.call(shlex.split("sudo ip link set %s %s" % (self.tap, cmd)))
 
 
-def mktap(tap: str = None) -> str:
+def mktap(tap: str, mac: str) -> str:
     logging.getLogger("").info("creating %s for %s" % (tap, getpass.getuser()))
 
     args = ['sudo', 'ip', 'tuntap', 'add', 'mode', 'tap', 'user', getpass.getuser()]
@@ -93,12 +90,16 @@ def mktap(tap: str = None) -> str:
     logging.getLogger("").info("Creating tap: %s" % tap)
     subprocess.call(args, stdout=subprocess.PIPE)
 
+    args = ['sudo', 'ip', 'link', 'set', 'dev', tap, 'address', mac]
+    logging.getLogger("").info("Setting mac to tap: %s" % tap)
+    subprocess.call(args, stdout=subprocess.PIPE)
+
     return tap
 
 
-def rmtap(name: str) -> bool:
+def rmtap(tap: str) -> bool:
     null = open('/dev/null', 'wb')
-    retcode = subprocess.call(['sudo', 'ip', 'tuntap', 'del', name, 'mode', 'tap'], stdout=null)
+    retcode = subprocess.call(['sudo', 'ip', 'tuntap', 'del', tap, 'mode', 'tap'], stdout=null)
     null.close()
     return retcode == 0
 
