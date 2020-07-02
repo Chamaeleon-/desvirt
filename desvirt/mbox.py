@@ -9,7 +9,7 @@ from desvirt.vif import VirtualInterface
 from desvirt.vnet import VirtualNet
 import scapy.supersocket
 from scapy import sendrecv, packet
-from scapy.utils import hexdump
+from scapy.utils import hexdump, wrpcap
 
 
 def parse_temperatures(temperature_file):
@@ -83,6 +83,8 @@ class MiddleBox:
     def alter_pkt(self, p: packet.Packet) -> Union[packet.Packet, bool]:
         """Return True to forward, False to drop and Packet so send an alternative packet"""
         # print(hexdump(p))  #TODO too many packets -> needs filtering?
+        wrpcap(f"/home/linda/Documents/MA/2020-ma-fliss-riot-simulation/evaluation/temp{self.number}.cap",
+               p, append=True)
         if self.packet_loss > 0 and random.randint(0, 100) < self.packet_loss:  # apply packet loss
             return False
         if self.delay > 0:  # apply packet delay
