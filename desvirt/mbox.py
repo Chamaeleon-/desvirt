@@ -5,10 +5,13 @@ import threading
 import random
 from time import sleep
 from typing import Optional, Union
+
+from scapy.layers import l2
+
 from desvirt.vif import VirtualInterface
 from desvirt.vnet import VirtualNet
 import scapy.supersocket
-from scapy import sendrecv, packet
+from scapy import sendrecv, packet, layers, all
 from scapy.utils import hexdump, wrpcap
 
 
@@ -82,9 +85,14 @@ class MiddleBox:
 
     def alter_pkt(self, p: packet.Packet) -> Union[packet.Packet, bool]:
         """Return True to forward, False to drop and Packet so send an alternative packet"""
-        # print(hexdump(p))  #TODO too many packets -> needs filtering?
         wrpcap(f"/home/linda/Documents/MA/2020-ma-fliss-riot-simulation/evaluation/temp{self.number}.cap",
                p, append=True)
+        payload = p[scapy.all.IPv6]
+        # print(payload.show())
+        print(p.show())
+        if payload is not None:
+            payload = scapy.utils.corrupt_bits(payload, p=0.01, n=None)
+            p[scapy.all.IPv6] = payload  # einfach zurückschreiben nicht möglich ?
         if self.packet_loss > 0 and random.randint(0, 100) < self.packet_loss:  # apply packet loss
             return False
         if self.delay > 0:  # apply packet delay
