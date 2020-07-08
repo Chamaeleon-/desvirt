@@ -87,36 +87,99 @@ class MiddleBox:
         """Return True to forward, False to drop and Packet so send an alternative packet"""
         wrpcap(f"/home/linda/Documents/MA/2020-ma-fliss-riot-simulation/evaluation/temp{self.number}.cap",
                p, append=True)
+        ber = self.calculate_ber()
+        if (self.packet_loss > 0 and random.randint(0, 100) < self.packet_loss) or ber == 1:  # apply packet loss
+            return False
         payload = p.payload
         # print(payload.show()
         # p[scapy.all.Ether].show()
         ether = scapy.all.Ether(dst=p[scapy.all.Ether].dst, src=p[scapy.all.Ether].src, type=p[scapy.all.Ether].type)
         if payload is not None:
-            payload = scapy.utils.corrupt_bits(payload, p=self.calculate_ber(), n=None)
+            payload = scapy.utils.corrupt_bits(payload, p=ber, n=None)
             p = ether / scapy.all.IPv6(payload)
             p.show()
-
-        if self.packet_loss > 0 and random.randint(0, 100) < self.packet_loss:  # apply packet loss
-            return False
         if self.delay > 0:  # apply packet delay
             sleep(self.delay)
-        return True
+        return p
 
     def block_pkt(self, p: packet.Packet) -> bool:
         return False
 
     def calculate_rx_power(self) -> Optional[float]:
         # TODO add temp offset
-        if (self.tx_power - self.fspl) > (self.noise_floor + self.sensitivity_offset):
-            return self.tx_power - self.fspl
+        offset = self.get_temp_signal_offset(3)
+        if (self.tx_power - self.fspl + offset) > (self.noise_floor + self.sensitivity_offset):
+            return self.tx_power - self.fspl + offset
         else:
-            return 1
-
-    def get_temp_signal_offset(self, temp: float):
-        # TODO implement LUT
-        loss = temp
-        return loss
+            return None
 
     def calculate_ber(self) -> float:
-        snr = self.calculate_rx_power() / self.noise_floor
+        rx = self.calculate_rx_power()
+        if not rx:
+            return 1
+        snr = rx / self.noise_floor
         return min(8 * math.exp(-0.6 * (snr + 0.5)), 1.0)
+
+    def get_temp_signal_offset(self, temp: float) -> float:
+        # TODO implement LUT
+        if temp <= 3.0:
+            return 0.6
+        if temp <= 4.0:
+            return 0.55
+        if temp <= 5.0:
+            return 0.6
+        if temp <= 6.0:
+            return 0.6
+        if temp <= 7.0:
+            return 0.6
+        if temp <= 8.0:
+            return 2.24
+        if temp <= 9.0:
+            return 0.68
+        if temp <= 10.0:
+            return 0.22
+        if temp <= 11.0:
+            return 2.13
+        if temp <= 12.0:
+            return 1.07
+        if temp <= 13.0:
+            return -1.92
+        if temp <= 14.0:
+            return -4.4
+        if temp <= 15.0:
+            return -2.73
+        if temp <= 16.0:
+            return -3.26
+        if temp <= 17.0:
+            return -1.73
+        if temp <= 18.0:
+            return -3.03
+        if temp <= 19.0:
+            return -1.8
+        if temp <= 20.0:
+            return -3.9
+        if temp <= 21.0:
+            return -4.57
+        if temp <= 22.0:
+            return -4.4
+        if temp <= 23.0:
+            return -4.28
+        if temp <= 24.0:
+            return -4.03
+        if temp <= 25.0:
+            return -4.0
+        if temp <= 26.0:
+            return -4.0
+        if temp <= 27.0:
+            return -3.71
+        if temp <= 28.0:
+            return -3.4
+        if temp <= 29.0:
+            return -3.52
+        if temp <= 30.0:
+            return -3.4
+        if temp <= 31.0:
+            return -3.81
+        if temp <= 32.0:
+            return -3.68
+        return -4.0
