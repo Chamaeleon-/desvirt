@@ -87,12 +87,15 @@ class MiddleBox:
         """Return True to forward, False to drop and Packet so send an alternative packet"""
         wrpcap(f"/home/linda/Documents/MA/2020-ma-fliss-riot-simulation/evaluation/temp{self.number}.cap",
                p, append=True)
-        payload = p[scapy.all.IPv6]
-        # print(payload.show())
-        print(p.show())
+        payload = p.payload
+        # print(payload.show()
+        # p[scapy.all.Ether].show()
+        ether = scapy.all.Ether(dst=p[scapy.all.Ether].dst, src=p[scapy.all.Ether].src, type=p[scapy.all.Ether].type)
         if payload is not None:
-            payload = scapy.utils.corrupt_bits(payload, p=0.01, n=None)
-            p[scapy.all.IPv6] = payload  # einfach zurückschreiben nicht möglich ?
+            payload = scapy.utils.corrupt_bits(payload, p=self.calculate_ber(), n=None)
+            p = ether / scapy.all.IPv6(payload)
+            p.show()
+
         if self.packet_loss > 0 and random.randint(0, 100) < self.packet_loss:  # apply packet loss
             return False
         if self.delay > 0:  # apply packet delay
@@ -107,7 +110,7 @@ class MiddleBox:
         if (self.tx_power - self.fspl) > (self.noise_floor + self.sensitivity_offset):
             return self.tx_power - self.fspl
         else:
-            return None
+            return 1
 
     def get_temp_signal_offset(self, temp: float):
         # TODO implement LUT
