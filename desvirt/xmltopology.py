@@ -104,7 +104,7 @@ class XMLTopology():
                 distance = 10
             noise_floor = link.getAttribute('noise_floor')
             if not noise_floor:
-                noise_floor = -30
+                noise_floor = -100
             sensitivity_offset = link.getAttribute('sensitivity_offset')
             if not sensitivity_offset:
                 sensitivity_offset = 5
