@@ -17,6 +17,14 @@ def parse_temperatures(temperature_file):
         return list(temperature_lines)
 
 
+def calculate_flips(ber:float, number_of_bits:int) -> int:
+    flips = 0
+    for i in range(number_of_bits):
+        if random.random() < ber:
+            flips = flips + 1
+    return flips
+
+
 class MiddleBox:
     list_of_boxes = []
     thread = None
