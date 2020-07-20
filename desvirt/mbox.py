@@ -1,17 +1,13 @@
 import csv
 import math
-import subprocess
 import threading
 import random
 from time import sleep
 from typing import Optional, Union
-
-from scapy.layers import l2
-
 from desvirt.vif import VirtualInterface
 from desvirt.vnet import VirtualNet
 import scapy.supersocket
-from scapy import sendrecv, packet, layers, all
+from scapy import sendrecv, packet, all
 from scapy.utils import hexdump, wrpcap
 
 
@@ -46,12 +42,6 @@ class MiddleBox:
         self.frequency = frequency  # in megahertz
         self.fspl = 20 * math.log10(distance) + 20 * math.log10(frequency) - 27.55
         self.temperature_file = temperature_file
-        # self.in_if = VirtualInterface(macaddr=None, up=True, net=net, nicname=f'{self.name}-in', create=True,
-        #                                   node=None, tap=f'mb{self.number}i')
-        # self.out_if = VirtualInterface(macaddr=None, up=True, net=net, nicname=f'{self.name}-out', create=True,
-        #                                    node=None, tap=f'mb{self.number}o')
-        # self.ingoing = scapy.supersocket.TunTapInterface(iface=self.in_if.tap)
-        # self.outgoing = scapy.supersocket.TunTapInterface(iface=self.out_if.tap)
         MiddleBox.list_of_boxes.append(self)
         self.stopbox = threading.Event()
 
@@ -63,13 +53,9 @@ class MiddleBox:
         self.thread.start()
 
     def delete(self):
-        # if self.thread is not None:
-        #     self.thread.join()
         if self.in_if and self.out_if is not None:
             self.stopbox.set()
             self.thread.join(2.0)
-            # self.ingoing.close()
-            # self.outgoing.close()
             sleep(1.5)
             self.out_if.delete()
             self.in_if.delete()
