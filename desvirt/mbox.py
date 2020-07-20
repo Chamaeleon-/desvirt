@@ -114,7 +114,10 @@ class MiddleBox:
         if not rx:
             return 1
         snr = rx / self.noise_floor
-        return min(8 * math.exp(-0.6 * (snr + 0.5)), 1.0)
+        if snr < 0:
+            snr = 0
+        # return min(8 * math.exp(-0.6 * (snr + 0.5)), 1.0)
+        return math.exp(-0.6 * (snr + 0.5))
 
     def get_temp_signal_offset(self, temp: float) -> float:
         # TODO implement LUT
