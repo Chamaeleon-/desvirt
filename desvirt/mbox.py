@@ -17,7 +17,7 @@ def parse_temperatures(temperature_file):
         return list(temperature_lines)
 
 
-def calculate_flips(ber:float, number_of_bits:int) -> int:
+def calculate_flips(ber: float, number_of_bits: int) -> int:
     flips = 0
     for i in range(number_of_bits):
         if random.random() < ber:
@@ -33,7 +33,7 @@ class MiddleBox:
     out_if = None
     number = 0
 
-    def __init__(self, from_if: VirtualInterface, to_if: VirtualInterface, net, distance: float,
+    def __init__(self, from_if: VirtualInterface, to_if: VirtualInterface, net: VirtualNet, distance: float,
                  noise_floor: float, sensitivity_offset: float, tx_power: float, frequency: float = 2440,
                  delay: float = 0, packetloss: float = 0, temperature_file: str = None):
         self.from_if = from_if
@@ -113,14 +113,21 @@ class MiddleBox:
         rx = self.calculate_rx_power()
         if not rx:
             return 1
-        snr = rx / self.noise_floor
+        snr = rx - self.noise_floor
         if snr < 0:
             snr = 0
-        # return min(8 * math.exp(-0.6 * (snr + 0.5)), 1.0)
-        return math.exp(-0.6 * (snr + 0.5))
+        # for ber on chip codes use: return min(8 * math.exp(-0.6 * (snr + 0.5)), 1.0)
+        ber = math.exp(-0.6 * (snr + 0.5))
+        return self.limit_ber(ber)
+
+    def limit_ber(self, ber: float) -> float:
+        if ber > 0.99:
+            ber = 0.99
+        elif ber < 0:
+            ber = 0
+        return ber
 
     def get_temp_signal_offset(self, temp: float) -> float:
-        # TODO implement LUT
         if temp <= 3.0:
             return 0.6
         if temp <= 4.0:
