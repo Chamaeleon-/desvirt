@@ -1,7 +1,9 @@
 import csv
+import logging
 import math
 import threading
 import random
+import time
 from time import sleep
 from typing import Optional, Union
 from desvirt.vif import VirtualInterface
@@ -10,15 +12,27 @@ import scapy.supersocket
 from scapy import sendrecv, packet, all
 from scapy.utils import hexdump, wrpcap
 
+initial_time: float = time.perf_counter_ns()
 
-def parse_temperatures(temperature_file):
+
+def parse_temperatures(temperature_file: str) -> iter:
+    if temperature_file is None:
+        return iter([(0, 15)])
     with open(temperature_file) as csvfile:
         temperature_lines = csv.reader(csvfile)
-        return list(temperature_lines)
+        i = iter(list(temperature_lines))
+        print(i)
+        return i
+
+
+def get_time() -> float:
+    t = time.perf_counter_ns() - initial_time
+    print(f'time: {t}')
+    return t
 
 
 def calculate_flips(ber: float, number_of_bits: int) -> int:
-    flips = 0
+    flips: int = 0
     for i in range(number_of_bits):
         if random.random() < ber:
             flips = flips + 1
@@ -49,12 +63,33 @@ class MiddleBox:
         self.tx_power = tx_power  # in dB
         self.frequency = frequency  # in megahertz
         self.fspl = 20 * math.log10(distance) + 20 * math.log10(frequency) - 27.55
-        self.temperature_file = temperature_file
+        self.temperature_file = './temp'#temperature_file
+        self.temperature_lines = parse_temperatures(self.temperature_file)
+        self.current_temperature = (0, 0)
         MiddleBox.list_of_boxes.append(self)
         self.stopbox = threading.Event()
 
+    def get_temperature(self) -> float:
+        t = get_time()
+        logging.getLogger("").debug("called get_temperature")
+        if self.current_temperature[0] == 0:
+            new_line: tuple = tuple(next(self.temperature_lines))
+            print(new_line)
+            self.current_temperature: tuple = (self.current_temperature[0] + float(new_line[0]), new_line[1])
+            return float(self.current_temperature[1])
+        if t <= self.current_temperature[0]:
+            print(self.current_temperature)
+            return float(self.current_temperature[1])
+        while self.current_temperature[0] > t:
+            new_line: tuple = tuple(next(self.temperature_lines))
+            print(new_line)
+            if new_line[0] == "LOOP":
+                continue
+            self.current_temperature: tuple = (self.current_temperature[0] + float(new_line[0]), new_line[1])
+        print(f'temp tuple: {self.current_temperature}')
+        return float(self.current_temperature[1])
+
     def start(self):
-        # temperatures = parse_temperatures(self.temperature_file)
         # start box process thread
         print("start middlebox")
         self.thread = threading.Thread(target=self.box, daemon=True)
@@ -81,8 +116,9 @@ class MiddleBox:
         """Return True to forward, False to drop and Packet so send an alternative packet"""
         wrpcap(f"/home/linda/Documents/MA/2020-ma-fliss-riot-simulation/evaluation/temp{self.number}.cap",
                p, append=True)
-        # ber = self.calculate_ber()
-        ber = 0.0001
+        ber = self.calculate_ber()
+        print(f'BER: {ber}')
+        # ber = 0.0001
         if (self.packet_loss > 0 and random.randint(0, 100) < self.packet_loss) or ber == 1:  # apply packet loss
             return False
         payload = p.payload
@@ -102,25 +138,28 @@ class MiddleBox:
         return False
 
     def calculate_rx_power(self) -> Optional[float]:
-        # TODO add temp offset
-        offset = self.get_temp_signal_offset(3)
+        # add temp offset
+        offset: float = self.get_temp_signal_offset(self.get_temperature())
+        print(f'Offset: {offset}')
         if (self.tx_power - self.fspl + offset) > (self.noise_floor + self.sensitivity_offset):
             return self.tx_power - self.fspl + offset
         else:
             return None
 
     def calculate_ber(self) -> float:
-        rx = self.calculate_rx_power()
+        rx: float = self.calculate_rx_power()
         if not rx:
             return 1
-        snr = rx - self.noise_floor
+        snr: float = rx - self.noise_floor
+        print(f'SNR: {snr}')
         if snr < 0:
             snr = 0
         # for ber on chip codes use: return min(8 * math.exp(-0.6 * (snr + 0.5)), 1.0)
-        ber = math.exp(-0.6 * (snr + 0.5))
+        ber: float = math.exp(-0.6 * (snr + 0.5))
         return self.limit_ber(ber)
 
     def limit_ber(self, ber: float) -> float:
+        # ber = round(ber, 6)
         if ber > 0.99:
             ber = 0.99
         elif ber < 0:
