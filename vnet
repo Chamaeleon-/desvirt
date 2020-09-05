@@ -10,6 +10,8 @@ import atexit
 import shlex
 import logging
 
+t = time.time()
+
 try:
     import libvirt
 except:
@@ -354,6 +356,8 @@ def main():
     if options.start:
         save_statefile("%s/%s.taps" % (lib_dir,base), taps)
         save_statefile("%s/%s.pids" % (lib_dir,base), pids)
+        print('SETUPTIME: %i',time.time() - t)
+
 
 def load_statefile(filename):
     content = None
