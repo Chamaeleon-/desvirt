@@ -46,8 +46,14 @@ class RIOT():
             port_number = int(self.tcp_port)
         else:
             port_number = get_free_tcp_port(logger=self.logger)
-        start_riot = "socat EXEC:'%s %s',end-close,stderr,pty TCP-L:%d,reuseaddr,fork" \
-                     % (self.binary, self.tap, port_number)
+        tmp = self.binary.split(' ', 1)
+        binary_file = tmp[0]
+        if 1 < len(tmp):
+            binary_params = tmp[1]
+        else:
+            binary_params = ""
+        start_riot = "socat EXEC:'%s %s %s',end-close,stderr,pty TCP-L:%d,reuseaddr,fork" \
+                     % (binary_file, self.tap, binary_params, port_number)
         self.logger.info("Start the RIOT: %s" % start_riot)
         try:
             proc = subprocess.Popen(start_riot, shell=True)
