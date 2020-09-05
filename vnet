@@ -10,6 +10,9 @@ import logging
 import desvirt.vif
 from desvirt import mbox
 
+t = time.perf_counter_ns()
+
+
 try:
     import libvirt
 except:
@@ -354,11 +357,12 @@ def main():
     if options.start:
         save_statefile("%s/%s.taps" % (lib_dir,base), vif.VirtualInterface.taps)
         save_statefile("%s/%s.pids" % (lib_dir,base), pids)
+        print(f'SETUPTIME: {time.perf_counter_ns() - t}')
         input("Press Enter to exit...")
 
-        for m in mbox.MiddleBox.list_of_boxes:
-            logger.info(f"Deleting MiddleBox {m.number}")
-            m.delete()
+        # for m in mbox.MiddleBox.list_of_boxes:
+        #     logger.info(f"Deleting MiddleBox {m.number}")
+        #     m.delete()
 
         create_lockfile(lockfile, content="stopped")
 

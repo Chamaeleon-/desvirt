@@ -42,14 +42,9 @@ def calculate_flips(ber: float, number_of_bits: int) -> int:
 class MiddleBox:
     list_of_boxes = []
     thread = None
-    temp_offset_lut = None
-    in_if = None
-    out_if = None
     number = 0
 
-    def __init__(self, from_if: VirtualInterface, to_if: VirtualInterface, net: VirtualNet, distance: float,
-                 noise_floor: float, sensitivity_offset: float, tx_power: float, frequency: float = 2440,
-                 delay: float = 0, packetloss: float = 0, temperature_file: str = None):
+    def __init__(self, from_if: VirtualInterface, to_if: VirtualInterface, net: VirtualNet, distance: float, noise_floor: float, sensitivity_offset: float, tx_power: float, frequency: float = 2440, delay: float = 0, packetloss: float = 0, temperature_file: str = None):
         self.from_if = from_if
         self.to_if = to_if
         self.name = f'mb-{self.from_if.nicname}-{self.to_if.nicname}'
@@ -95,14 +90,6 @@ class MiddleBox:
         self.thread = threading.Thread(target=self.box, daemon=True)
         self.thread.start()
 
-    def delete(self):
-        if self.in_if and self.out_if is not None:
-            self.stopbox.set()
-            self.thread.join(2.0)
-            sleep(1.5)
-            self.out_if.delete()
-            self.in_if.delete()
-
     def stop_sniff(self, p: packet.Packet) -> bool:
         return self.stopbox.isSet()
 
@@ -114,24 +101,24 @@ class MiddleBox:
 
     def alter_pkt(self, p: packet.Packet) -> Union[packet.Packet, bool]:
         """Return True to forward, False to drop and Packet so send an alternative packet"""
-        wrpcap(f"/home/linda/Documents/MA/2020-ma-fliss-riot-simulation/evaluation/temp{self.number}.cap",
-               p, append=True)
-        ber = self.calculate_ber()
-        print(f'BER: {ber}')
-        # ber = 0.0001
-        if (self.packet_loss > 0 and random.randint(0, 100) < self.packet_loss) or ber == 1:  # apply packet loss
-            return False
-        payload = p.payload
-        p.show()
-        ether = scapy.all.Ether(dst=p[scapy.all.Ether].dst, src=p[scapy.all.Ether].src, type=p[scapy.all.Ether].type)
-        # ether.type = 0xa0ed ?
-        if payload is not None:
-            number_of_bit_flips = calculate_flips(ber, len(payload)*8)
-            payload = scapy.utils.corrupt_bits(payload, n=number_of_bit_flips)
-            p = ether / payload
-            p.show()
-        if self.delay > 0:  # apply packet delay
-            sleep(self.delay)
+        # wrpcap(f"/home/linda/Documents/MA/2020-ma-fliss-riot-simulation/evaluation/temp{self.number}.cap",
+        #        p, append=True)
+        # ber = self.calculate_ber()
+        # print(f'BER: {ber}')
+        # # ber = 0.0001
+        # if (self.packet_loss > 0 and random.randint(0, 100) < self.packet_loss) or ber == 1:  # apply packet loss
+        #     return False
+        # payload = p.payload
+        # p.show()
+        # ether = scapy.all.Ether(dst=p[scapy.all.Ether].dst, src=p[scapy.all.Ether].src, type=p[scapy.all.Ether].type)
+        # # ether.type = 0xa0ed ?
+        # if payload is not None:
+        #     number_of_bit_flips = calculate_flips(ber, len(payload)*8)
+        #     payload = scapy.utils.corrupt_bits(payload, n=number_of_bit_flips)
+        #     p = ether / payload
+        #     p.show()
+        # if self.delay > 0:  # apply packet delay
+        #     sleep(self.delay)
         return p
 
     def block_pkt(self, p: packet.Packet) -> bool:
