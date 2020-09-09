@@ -9,7 +9,7 @@
             </nodeType>
         </nodeTypes>
         <nodes>
-            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 ff02::2\\\&quot;' " name="0" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 ff02::2\\\&quot;' " name="0" type="riot_native"/>
             <node binary="./gnrc_networking.elf" name="1" type="riot_native"/>
             <node binary="./gnrc_networking.elf" name="2" type="riot_native"/>
             <node binary="./gnrc_networking.elf" name="3" type="riot_native"/>
