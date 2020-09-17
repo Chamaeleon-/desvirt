@@ -7,6 +7,8 @@ import subprocess
 import shlex
 import logging
 
+import scapy
+
 import desvirt.vif
 from desvirt import mbox
 
@@ -27,7 +29,7 @@ from desvirt.xmltopology import XMLTopology
 """
 Global variables
 """
-in_testbed = False
+in_testbed = True
 
 topo = None
 macs = None
@@ -446,27 +448,28 @@ def register_hostnames(network_name, nodes):
     netcfg_file = open(netcfg, 'wb')
 
     for (key, node) in list(nodes.items()):
-        netcfg_file.write("%s %s %s\n" % (node.nics[0].macaddr, node.fullname, node.nics[1].macaddr))
+        bytestring = str.encode("%s %s %s\n" % (node.nics[0].macaddr, node.fullname, "fe80::" +scapy.utils6.in6_mactoifaceid(node.nics[0].macaddr)))
+        netcfg_file.write(bytestring)
 
     netcfg_file.close()
-
-    retcode = subprocess.call(shlex.split(("scp -i /home/virt/.ssh/id_rsa %s vmnet@uhu:/testbed/tftpboot/hostnames/" % netcfg).encode('utf-8')))
-
-    if retcode != 0:
-        logger.warn("Error registering hostnames!")
-    else:
-        retcode = update_hostnames()
-        if retcode != 0:
-            logger.warn("Error registering hostnames!")
+    #
+    # retcode = subprocess.call(shlex.split(("scp -i /home/virt/.ssh/id_rsa %s vmnet@uhu:/testbed/tftpboot/hostnames/" % netcfg).encode('utf-8')))
+    #
+    # if retcode != 0:
+    #     logger.warn("Error registering hostnames!")
+    # else:
+    #     retcode = update_hostnames()
+    #     if retcode != 0:
+    #         logger.warn("Error registering hostnames!")
     
 def unregister_hostnames(network_name):
 
-    status = subprocess.call(shlex.split("ssh -q -q -oBatchMode=yes -i /home/virt/.ssh/id_rsa vmnet@uhu sudo /testbed/bin/unregister_vnet %s" % (network_name).encode('utf-8')))
-
+    # status = subprocess.call(shlex.split("ssh -q -q -oBatchMode=yes -i /home/virt/.ssh/id_rsa vmnet@uhu sudo /testbed/bin/unregister_vnet %s" % (network_name).encode('utf-8')))
+    status = True
     return status
 
-def update_hostnames():
-    return subprocess.call(shlex.split("ssh -q -q -oBatchMode=yes -i /home/virt/.ssh/id_rsa vmnet@uhu sudo /testbed/bin/register_vnet".encode('utf-8')))
+# def update_hostnames():
+#     return subprocess.call(shlex.split("ssh -q -q -oBatchMode=yes -i /home/virt/.ssh/id_rsa vmnet@uhu sudo /testbed/bin/register_vnet".encode('utf-8')))
 
 
 def check_lockfile(filename):
