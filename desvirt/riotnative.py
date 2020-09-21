@@ -52,7 +52,7 @@ class RIOT():
             binary_params = tmp[1]
         else:
             binary_params = ""
-        start_riot = 'socat EXEC:"%s %s %s",end-close,stderr,pty TCP-L:%d,reuseaddr,fork' \
+        start_riot = 'socat SYSTEM:"%s %s %s",end-close,stderr,pty TCP-L:%d,reuseaddr,fork' \
                      % (binary_file, self.tap, binary_params, port_number)
         self.logger.info("Start the RIOT: %s" % start_riot)
         try:
