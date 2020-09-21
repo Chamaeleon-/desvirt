@@ -10,36 +10,36 @@
         </nodeTypes>
         <nodes>
             <node binary="./gnrc_networking.elf" name="1" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="2" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="3" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="4" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="5" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="6" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="7" type="riot_native"/>
-            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 ff02::2\\\&quot;' " name="8" type="riot_native"/>
-            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 ff02::2\\\&quot;' " name="9" type="riot_native"/>
-            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 ff02::2\\\&quot;' " name="10" type="riot_native"/>
-            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 ff02::2\\\&quot;' " name="11" type="riot_native"/>
-            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 ff02::2\\\&quot;' " name="12" type="riot_native"/>
-            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 ff02::2\\\&quot;' " name="13" type="riot_native"/>
-            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 ff02::2\\\&quot;' " name="14" type="riot_native"/>
-            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 ff02::2\\\&quot;' " name="15" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="16" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="17" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="18" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="19" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="20" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="21" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="22" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="23" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="24" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="25" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="26" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="27" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="28" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="29" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="30" type="riot_native"/>
-            <node binary="./gnrc_networking.elf" name="31" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE06:B5C6\\\&quot;' | tee -a tree.txt" name="2" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE06:B5C6\\\&quot;' | tee -a tree.txt" name="3" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE72:D108\\\&quot;' | tee -a tree.txt" name="4" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE72:D108\\\&quot;' | tee -a tree.txt" name="5" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE2B:70AD\\\&quot;' | tee -a tree.txt" name="6" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE2B:70AD\\\&quot;' | tee -a tree.txt" name="7" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE32:DFFD\\\&quot;' | tee -a tree.txt" name="8" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE32:DFFD\\\&quot;' | tee -a tree.txt" name="9" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE1C:6E68\\\&quot;' | tee -a tree.txt" name="10" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE1C:6E68\\\&quot;' | tee -a tree.txt" name="11" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE55:3362\\\&quot;' | tee -a tree.txt" name="12" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE55:3362\\\&quot;' | tee -a tree.txt" name="13" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE4E:7D9A\\\&quot;' | tee -a tree.txt" name="14" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE4E:7D9A\\\&quot;' | tee -a tree.txt" name="15" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE46:C89D\\\&quot;' | tee -a tree.txt" name="16" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE46:C89D\\\&quot;' | tee -a tree.txt" name="17" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE29:DC24\\\&quot;' | tee -a tree.txt" name="18" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE29:DC24\\\&quot;' | tee -a tree.txt" name="19" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE14:8D2E\\\&quot;' | tee -a tree.txt" name="20" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE14:8D2E\\\&quot;' | tee -a tree.txt" name="21" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE5F:6157\\\&quot;' | tee -a tree.txt" name="22" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE5F:6157\\\&quot;' | tee -a tree.txt" name="23" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE30:89BF\\\&quot;' | tee -a tree.txt" name="24" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE30:89BF\\\&quot;' | tee -a tree.txt" name="25" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE02:BCDD\\\&quot;' | tee -a tree.txt" name="26" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE02:BCDD\\\&quot;' | tee -a tree.txt" name="27" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE7F:6D28\\\&quot;' | tee -a tree.txt" name="28" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE7F:6D28\\\&quot;' | tee -a tree.txt" name="29" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE78:8555\\\&quot;' | tee -a tree.txt" name="30" type="riot_native"/>
+            <node binary="./gnrc_networking.elf -C '\\\&quot;ping6 -c 5 fe80::5251:52FF:FE78:8555\\\&quot;' | tee -a tree.txt" name="31" type="riot_native"/>
         </nodes>
         <links>
             <link broadcast_loss="0.0" from_if="wlan0" from_node="1" loss="0.0" to_if="wlan0" to_node="2" uni="false"/>
